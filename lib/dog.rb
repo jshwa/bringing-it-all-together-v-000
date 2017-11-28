@@ -36,13 +36,13 @@ class Dog
 
   def self.find_by_id(id)
     row = DB[:conn].execute("SELECT * FROM dogs WHERE id = ?", id).first
-    Dog.new(name:row[1], breed:row[2], id:row[0])
+    self.new_from_db(row)
   end
 
   def self.find_or_create_by(name:, breed:)
     dog = DB[:conn].execute("SELECT * FROM dogs WHERE name = ? AND breed = ?", name, breed)
     if !dog.empty?
-      self.find_by_id(dog[0][0])
+      self.new_from_db(dog)
     else
       self.create(name:name, breed:breed)
     end
@@ -50,5 +50,14 @@ class Dog
 
   def self.new_from_db(row)
     Dog.new(name:row[1], breed:row[2], id:row[0])
+  end
+
+  def self.find_by_name(name)
+    dog = DB[:conn].execute(SELECT * FROM dogs WHERE name = ?, name).first
+    self.new_from_db(dog)
+  end
+
+  def update
+    DB[:conn].execute("UPDATE dogs SET name = ?, breed = ? WHERE id = ?", self.name, self.breed, self.id)
   end
 end
